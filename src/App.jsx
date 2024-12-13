@@ -1,5 +1,5 @@
 import React from "react";
-import MainTable from "./Table.jsx";
+import MainTable from "./MainTable.jsx";
 import useWindowSize from "./useWindowSize.js";
 import { Button, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
@@ -41,7 +41,7 @@ function App() {
             }}
             icon={<PlusOutlined />}
             target="_blank"
-            href="google.com"
+            href={import.meta.env.VITE_APP_LINK_TO_NEW_PROVIDER_FORM}
           >
             New Provider
           </Button>
