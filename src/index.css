@@ -11,3 +11,10 @@ html, body, #root {
 body {
   margin: 0px !important;
 }
+
+.ant-table-small .ant-table-container .ant-table-body,
+.ant-table-small .ant-table-container .ant-table-content {
+  scrollbar-width: thin;
+  scrollbar-color: #eaeaea transparent;
+  scrollbar-gutter: stable;
+}

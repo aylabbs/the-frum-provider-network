@@ -46,7 +46,7 @@ const makeColumns = (data) =>
         makeTagsColumn("serviceAreas", data.serviceAreas),
       ];
 function MainTable({ height, width }) {
-  const [data, setData] = useState({});
+  const [data, setData] = useState();
   const [tableHeight, setTableHeight] = useState(0);
   useEffect(() => {
     const headerHeight = Number(
@@ -70,14 +70,16 @@ function MainTable({ height, width }) {
   }, []);
   return (
     <Table
-      dataSource={data?.providers ?? []}
+      tableLayout="auto"
+      dataSource={data ? data?.providers : []}
       columns={makeColumns(data)}
       size="small"
-      virtual
+      // virtual
+      loading={!data}
       pagination={false}
       scroll={{
         x: width,
-        y: tableHeight,
+        y: tableHeight -20,
       }}
     />
   );
