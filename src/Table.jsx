@@ -1,117 +1,50 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
+import { capitalCase } from "change-case";
+
 import { Table, Tag } from "antd";
-const Tags = ({ values }) => {
-  return (
-    <div>
-      {[
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-        <Tag>Hello</Tag>,
-      ]}
-    </div>
-  );
-};
-const columns = [
-  {
-    title: "ID",
-    ellipsis: true,
-    dataIndex: "id",
-    key: "id",
-    sorter: (a, b) => a.id - b.id,
-    width: 70,
-  },
-  {
-    title: "First Name",
-    ellipsis: true,
-    dataIndex: "firstName",
-    key: "firstName",
-    sorter: (a, b) => a.firstName.localeCompare(b.firstName),
+function makeTextColumn(field, data) {
+  return {
+    title: capitalCase(field),
+    dataIndex: field,
+    key: field,
+    sorter: (a, b) => a[field].localeCompare(b[field]),
     filterSearch: true,
-    onFilter: (value, record) => record.name.includes(value),
-    render: () => {
-      return (
-        <Tags
-          values={[
-            "Hello",
-            "Hello",
-            "Hello",
-            "Hello",
-            "Hello",
-            "Hello",
-            "Hello",
-            "Hello",
-          ]}
-        />
-      );
+    onFilter: (value, record) => record[field] === value,
+    filters: data.providers
+      .filter((provider) => provider[field])
+      .map((provider) => ({
+        text: provider[field],
+        value: provider[field],
+      })),
+  };
+}
+function makeTagsColumn(field, filterOptions) {
+  return {
+    title: capitalCase(field),
+    dataIndex: field,
+    render: (values) => {
+      return (values ?? []).filter(Boolean).map((value) => <Tag>{value}</Tag>);
     },
-    filters: [
-      {
-        text: "Joe",
-        value: "Joe",
-      },
-      {
-        text: "Category 1",
-        value: "Category 1",
-      },
-      {
-        text: "Category 2",
-        value: "Category 2",
-      },
-    ],
-  },
-  {
-    title: "Last Name",
-    ellipsis: true,
-    dataIndex: "lastName",
-    key: "lastName",
-    sorter: (a, b) => a.lastName.localeCompare(b.lastName),
-  },
-  {
-    title: "Email",
-    ellipsis: true,
-    dataIndex: "email",
-    key: "email",
-    sorter: (a, b) => a.email.localeCompare(b.email),
-  },
-  {
-    title: "Phone",
-    ellipsis: true,
-    dataIndex: "phone",
-    key: "phone",
-    sorter: (a, b) => a.phone.localeCompare(b.phone),
-  },
-  {
-    title: "Address",
-    ellipsis: true,
-    dataIndex: "address",
-    key: "address",
-    sorter: (a, b) => a.address.localeCompare(b.address),
-  },
-  {
-    title: "Created At",
-    ellipsis: true,
-    dataIndex: "createdAt",
-    key: "createdAt",
-    sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-    render: (date) => new Date(date).toLocaleString(),
-  },
-  {
-    title: "Updated At",
-    ellipsis: true,
-    dataIndex: "updatedAt",
-    key: "updatedAt",
-    sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
-    render: (date) => new Date(date).toLocaleString(),
-  },
-];
+    key: field,
+    filterSearch: true,
+    onFilter: (value, record) => record[field].includes(value),
+    filters: filterOptions.filter(Boolean).map((value) => ({
+      text: value,
+      value,
+    })),
+  };
+}
+const makeColumns = (data) =>
+  !data?.providers
+    ? []
+    : [
+        makeTextColumn("Name", data),
+        makeTextColumn("Company", data),
+        makeTextColumn("Email", data),
+        makeTextColumn("Phone", data),
+        makeTagsColumn("Categories", data.categories),
+        makeTagsColumn("serviceAreas", data.serviceAreas),
+      ];
 function MainTable({ height, width }) {
   const [data, setData] = useState({});
   const [tableHeight, setTableHeight] = useState(0);
@@ -137,8 +70,8 @@ function MainTable({ height, width }) {
   }, []);
   return (
     <Table
-      dataSource={data?.contacts ?? []}
-      columns={columns}
+      dataSource={data?.providers ?? []}
+      columns={makeColumns(data)}
       size="small"
       virtual
       pagination={false}

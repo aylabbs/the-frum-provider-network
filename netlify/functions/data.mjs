@@ -16,16 +16,12 @@ async function getAirtableTable(tableName) {
   });
   return await response.json();
 }
-const tableNames = ["Providers", "Service Areas", "Referrers", "Categories"];
+const tableNames = ["Providers", "Service Areas", "Categories"];
 
 export default async function data(req, context) {
   const promises = tableNames.map(getAirtableTable);
-  const [
-    providersResponse,
-    serviceAreasResponse,
-    referrers,
-    categoriesResponse,
-  ] = await Promise.all(promises);
+  const [providersResponse, serviceAreasResponse, categoriesResponse] =
+    await Promise.all(promises);
   const categories = tableResponseToObject(categoriesResponse);
   const serviceAreas = tableResponseToObject(serviceAreasResponse);
 
@@ -33,19 +29,28 @@ export default async function data(req, context) {
     id: provider.id,
     Phone: provider.fields["Phone"],
     Categories: provider.fields["Categories"].map((id) => categories[id]),
-    lastName: provider.fields["Last Name"],
     Email: provider.fields["Email"],
     serviceAreas: provider.fields["Service Areas"].map(
       (id) => serviceAreas[id]
     ),
-    firstName: provider.fields["First Name"],
+    Name: `${provider.fields["First Name"]} ${provider.fields["Last Name"]}`
+      .trim()
+      // normalize whitespace
+      .replace(/\s+/g, " "),
     Company: provider.fields["Company"],
   }));
 
-  return new Response(JSON.stringify({ providers }), {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    status: 200,
-  });
+  return new Response(
+    JSON.stringify({
+      categories: Object.values(categories),
+      serviceAreas: Object.values(serviceAreas),
+      providers,
+    }),
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      status: 200,
+    }
+  );
 }
